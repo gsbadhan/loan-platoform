@@ -38,11 +38,6 @@ public class LoanServiceImpl implements LoanService {
 	@Qualifier("DisbursalOfficeAuthorityImpl")
 	private LoanAuthority<DisburseOfficeMessage> disburseOfficeAuthority;
 
-	@Autowired
-	public LoanServiceImpl(LoanWorkflowRepo loanWorkflowRepo) {
-		this.loanWorkflowRepo = loanWorkflowRepo;
-	}
-
 	@Override
 	public void initiateLoanRequest(LoanFormRequest request) {
 		validate(request);
@@ -67,7 +62,7 @@ public class LoanServiceImpl implements LoanService {
 					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
 			amqpTemplate.convertAndSend("loanProcessingExchng", "cardept.form.verify", carOfficeMessage);
 		} else {
-			notificationQueue(new ConfirmationMessage(msg, response));
+			sendToNotificationQueue(new ConfirmationMessage(msg, response));
 		}
 	}
 
@@ -79,7 +74,7 @@ public class LoanServiceImpl implements LoanService {
 					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
 			amqpTemplate.convertAndSend("loanProcessingExchng", "riskdept.form.verify", carOfficeMessage);
 		} else {
-			notificationQueue(new ConfirmationMessage(msg, response));
+			sendToNotificationQueue(new ConfirmationMessage(msg, response));
 		}
 	}
 
@@ -91,17 +86,17 @@ public class LoanServiceImpl implements LoanService {
 					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
 			amqpTemplate.convertAndSend("loanProcessingExchng", "disbursaldept.form.verify", carOfficeMessage);
 		} else {
-			notificationQueue(new ConfirmationMessage(msg, response));
+			sendToNotificationQueue(new ConfirmationMessage(msg, response));
 		}
 	}
 
 	@Override
 	public void disbursalOfficeAction(DisburseOfficeMessage msg) {
 		LoanAuthorityResponse response = disburseOfficeAuthority.process(msg);
-		notificationQueue(new ConfirmationMessage(msg, response));
+		sendToNotificationQueue(new ConfirmationMessage(msg, response));
 	}
 
-	private void notificationQueue(ConfirmationMessage confirmationMessage) {
+	private void sendToNotificationQueue(ConfirmationMessage confirmationMessage) {
 		amqpTemplate.convertAndSend("loanProcessingExchng", "loanconfirmation.notify", confirmationMessage);
 	}
 }

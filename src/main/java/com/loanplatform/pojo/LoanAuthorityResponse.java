@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoanAuthorityResponse {
-	private AuthorityAction authorityAction = AuthorityAction.REJECTED;
+	private AuthorityAction authorityAction = AuthorityAction.ACCEPTED;
 	private List<String> reviews;
 }

@@ -51,6 +51,55 @@ public class RabbitMQConfig {
 	}
 
 	@Bean
+	Queue carOfficeLoanVerificationQueue() {
+		return QueueBuilder.durable("cardept.verify.queue")
+				.withArgument("x-dead-letter-exchange", "deadLoanProcessingExchng")
+				.withArgument("x-dead-letter-routing-key", "deadLoan").build();
+	}
+
+	@Bean
+	Binding carOfficeLoanVerificationQueueBinding() {
+		return BindingBuilder.bind(carOfficeLoanVerificationQueue()).to(exchange()).with("cardept.form.verify");
+	}
+
+	@Bean
+	Queue riskOfficeLoanVerificationQueue() {
+		return QueueBuilder.durable("riskdept.verify.queue")
+				.withArgument("x-dead-letter-exchange", "deadLoanProcessingExchng")
+				.withArgument("x-dead-letter-routing-key", "deadLoan").build();
+	}
+
+	@Bean
+	Binding riskOfficeLoanVerificationQueueBinding() {
+		return BindingBuilder.bind(riskOfficeLoanVerificationQueue()).to(exchange()).with("riskdept.form.verify");
+	}
+
+	@Bean
+	Queue disbursalOfficeLoanVerificationQueue() {
+		return QueueBuilder.durable("disbursaldept.verify.queue")
+				.withArgument("x-dead-letter-exchange", "deadLoanProcessingExchng")
+				.withArgument("x-dead-letter-routing-key", "deadLoan").build();
+	}
+
+	@Bean
+	Binding disbursalOfficeLoanVerificationQueueBinding() {
+		return BindingBuilder.bind(disbursalOfficeLoanVerificationQueue()).to(exchange())
+				.with("disbursaldept.form.verify");
+	}
+
+	@Bean
+	Queue loanConfirmationQueue() {
+		return QueueBuilder.durable("loanconfirmation.queue")
+				.withArgument("x-dead-letter-exchange", "deadLoanProcessingExchng")
+				.withArgument("x-dead-letter-routing-key", "deadLoan").build();
+	}
+
+	@Bean
+	Binding loanConfrimationQueueBinding() {
+		return BindingBuilder.bind(loanConfirmationQueue()).to(exchange()).with("loanconfirmation.notify");
+	}
+
+	@Bean
 	public MessageConverter jsonMessageConverter() {
 		return new Jackson2JsonMessageConverter();
 	}
