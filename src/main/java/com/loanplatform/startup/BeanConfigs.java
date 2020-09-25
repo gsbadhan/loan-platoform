@@ -12,11 +12,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Configuration
 @PropertySource("classpath:application.properties")
-@Slf4j
 public class BeanConfigs {
 
 	@Autowired
@@ -26,10 +23,13 @@ public class BeanConfigs {
 	@Qualifier("authRestTemplate")
 	public RestTemplate googleRestTemplateB() {
 		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-		connManager.setMaxTotal(100);
-		connManager.setDefaultMaxPerRoute(20);
-		RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(5000).setConnectTimeout(5000)
-				.setSocketTimeout(5000).build();
+		connManager.setMaxTotal(Integer.parseInt(env.getProperty("auth.resttemplate.maxtotal")));
+		connManager.setDefaultMaxPerRoute(Integer.parseInt(env.getProperty("auth.resttemplate.maxperroute")));
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectionRequestTimeout(
+						Integer.parseInt(env.getProperty("auth.resttemplate.connectionrequesttimeout")))
+				.setConnectTimeout(Integer.parseInt(env.getProperty("auth.resttemplate.connecttimeout")))
+				.setSocketTimeout(Integer.parseInt(env.getProperty("auth.resttemplate.sockettimeout"))).build();
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(HttpClientBuilder.create().setConnectionManager(connManager)
 				.setDefaultRequestConfig(requestConfig).build());
