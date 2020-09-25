@@ -3,6 +3,7 @@ package com.loanplatform.service;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.loanplatform.common.AuthorityAction;
@@ -21,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LoanServiceImpl implements LoanService {
 
+	@Autowired
+	private Environment env;
 	@Autowired
 	private LoanWorkflowRepo loanWorkflowRepo;
 	@Autowired
@@ -45,7 +48,8 @@ public class LoanServiceImpl implements LoanService {
 		FrontOfficeMessage msg = new FrontOfficeMessage(loanRequestId.toString(), request.getCustomerDetail().getUid(),
 				request.getCustomerDetail().getFirstName(), request.getCustomerDetail().getLastName(),
 				request.getCarDetail());
-		amqpTemplate.convertAndSend("loanProcessingExchng", "frontOffice.form.verify", msg);
+		amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
+				env.getProperty("rabbitmq.queue.frontoffice.verify.routingkey"), msg);
 		log.info("sent message to RBMQ={}", msg);
 	}
 
@@ -60,7 +64,8 @@ public class LoanServiceImpl implements LoanService {
 		if (response.getAuthorityAction() == AuthorityAction.ACCEPTED) {
 			CarOfficeMessage carOfficeMessage = new CarOfficeMessage(msg.getLoanRequestId(), msg.getUid(),
 					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
-			amqpTemplate.convertAndSend("loanProcessingExchng", "cardept.form.verify", carOfficeMessage);
+			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
+					env.getProperty("rabbitmq.queue.cardept.verify.routingkey"), carOfficeMessage);
 		} else {
 			sendToNotificationQueue(new ConfirmationMessage(msg, response));
 		}
@@ -72,7 +77,8 @@ public class LoanServiceImpl implements LoanService {
 		if (response.getAuthorityAction() == AuthorityAction.ACCEPTED) {
 			CarOfficeMessage carOfficeMessage = new CarOfficeMessage(msg.getLoanRequestId(), msg.getUid(),
 					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
-			amqpTemplate.convertAndSend("loanProcessingExchng", "riskdept.form.verify", carOfficeMessage);
+			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
+					env.getProperty("rabbitmq.queue.riskdept.verify.routingkey"), carOfficeMessage);
 		} else {
 			sendToNotificationQueue(new ConfirmationMessage(msg, response));
 		}
@@ -84,7 +90,8 @@ public class LoanServiceImpl implements LoanService {
 		if (response.getAuthorityAction() == AuthorityAction.ACCEPTED) {
 			CarOfficeMessage carOfficeMessage = new CarOfficeMessage(msg.getLoanRequestId(), msg.getUid(),
 					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
-			amqpTemplate.convertAndSend("loanProcessingExchng", "disbursaldept.form.verify", carOfficeMessage);
+			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
+					env.getProperty("rabbitmq.queue.disbursaldept.verify.routingkey"), carOfficeMessage);
 		} else {
 			sendToNotificationQueue(new ConfirmationMessage(msg, response));
 		}
@@ -97,6 +104,7 @@ public class LoanServiceImpl implements LoanService {
 	}
 
 	private void sendToNotificationQueue(ConfirmationMessage confirmationMessage) {
-		amqpTemplate.convertAndSend("loanProcessingExchng", "loanconfirmation.notify", confirmationMessage);
+		amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
+				env.getProperty("rabbitmq.queue.loanconfirmation.routingkey"), confirmationMessage);
 	}
 }
