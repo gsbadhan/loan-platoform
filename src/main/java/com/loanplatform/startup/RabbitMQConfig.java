@@ -30,7 +30,7 @@ public class RabbitMQConfig {
 
 	@Bean
 	Queue deadLoanQueue() {
-		return QueueBuilder.durable("deadLoan.queue").build();
+		return QueueBuilder.durable("deadloan.queue").build();
 	}
 
 	@Bean

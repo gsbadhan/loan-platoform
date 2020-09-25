@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = FrontOfficeMessage.class)
-public class FrontOfficeMessage extends LoanApprovalMessage {
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = CarOfficeMessage.class)
+public class CarOfficeMessage extends LoanApprovalMessage {
 	private String loanRequestId;
 	private String uid;
 	private String firstName;
