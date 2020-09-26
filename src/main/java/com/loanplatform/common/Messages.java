@@ -2,7 +2,8 @@ package com.loanplatform.common;
 
 public enum Messages {
 
-	AUTH_SERVICE_DOWN("auth service not working"), NOT_SUPPORTED("Functionality not supported");
+	NOT_SUPPORTED("Functionality not supported"), UNAUTHORIZED("Not authorized"), NOT_FOUND("Requested data not found"),
+	SERVER_ERROR("Getting error from server");
 
 	private final String value;
 

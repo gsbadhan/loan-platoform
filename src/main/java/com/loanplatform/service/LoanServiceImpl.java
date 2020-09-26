@@ -1,5 +1,7 @@
 package com.loanplatform.service;
 
+import java.util.Optional;
+
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,12 +11,15 @@ import org.springframework.stereotype.Service;
 import com.loanplatform.common.AuthorityAction;
 import com.loanplatform.common.LoanStage;
 import com.loanplatform.common.LoanStatus;
+import com.loanplatform.common.Messages;
 import com.loanplatform.pojo.CarOfficeMessage;
 import com.loanplatform.pojo.ConfirmationMessage;
 import com.loanplatform.pojo.DisburseOfficeMessage;
 import com.loanplatform.pojo.FrontOfficeMessage;
 import com.loanplatform.pojo.LoanAuthorityResponse;
 import com.loanplatform.pojo.LoanFormRequest;
+import com.loanplatform.pojo.LoanStatusResponse;
+import com.loanplatform.pojo.LoanSubmitResponse;
 import com.loanplatform.pojo.RiskOfficeMessage;
 import com.loanplatform.repository.LoanWorkflowPojo;
 import com.loanplatform.repository.LoanWorkflowRepository;
@@ -45,25 +50,31 @@ public class LoanServiceImpl implements LoanService {
 	private LoanAuthority<DisburseOfficeMessage> disburseOfficeAuthority;
 
 	@Override
-	public void initiateLoanRequest(LoanFormRequest request) {
-		validate(request);
+	public LoanSubmitResponse initiateLoanRequest(LoanFormRequest request) {
+		LoanSubmitResponse response = new LoanSubmitResponse();
 		try {
+			formValidation(request);
 			LoanWorkflowPojo newWorkflowPojo = new LoanWorkflowPojo();
 			newWorkflowPojo.setFrontOffice(LoanStatus.PENDING.name());
 			LoanWorkflowPojo workflowPojoDb = loanWorkflowRepo.save(newWorkflowPojo);
+			response.setLoanRequestId(workflowPojoDb.getId());
 			FrontOfficeMessage msg = new FrontOfficeMessage(workflowPojoDb.getId().toString(),
 					request.getCustomerDetail().getUid(), request.getCustomerDetail().getFirstName(),
 					request.getCustomerDetail().getLastName(), request.getCarDetail());
 			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
 					env.getProperty("rabbitmq.queue.frontoffice.verify.routingkey"), msg);
 			log.info("sent message to RBMQ={}", msg);
+			return response;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("error occured in initiateLoanRequest {}", request, e);
+			response.setStatus(false);
+			response.appendErrors(Messages.SERVER_ERROR.name(), Messages.SERVER_ERROR.getValue());
 		}
+		return null;
 	}
 
-	private void validate(LoanFormRequest request) {
-		// TODO Auto-generated method stub
+	private void formValidation(LoanFormRequest request) {
+		// TODO : validate customer's data
 	}
 
 	@Override
@@ -144,5 +155,27 @@ public class LoanServiceImpl implements LoanService {
 			break;
 		}
 		loanWorkflowRepo.save(workflowPojoDb);
+	}
+
+	@Override
+	public LoanStatusResponse loanStatus(Long loanRequestId) {
+		LoanStatusResponse response = new LoanStatusResponse();
+		try {
+			Optional<LoanWorkflowPojo> data = loanWorkflowRepo.findById(loanRequestId);
+			if (data.isEmpty()) {
+				response.setStatus(false);
+				response.appendErrors(Messages.NOT_FOUND.name(), Messages.NOT_FOUND.getValue());
+				return response;
+			}
+			LoanWorkflowPojo dbPojo = data.get();
+			response = new LoanStatusResponse(dbPojo.getFrontOffice(), dbPojo.getCarloanOffice(),
+					dbPojo.getRiskOffice(), dbPojo.getDisbursalOffice());
+			return response;
+		} catch (Exception e) {
+			log.error("error occured in loanStatus loanRequest Id={}", loanRequestId, e);
+			response.setStatus(false);
+			response.appendErrors(Messages.SERVER_ERROR.name(), Messages.SERVER_ERROR.getValue());
+		}
+		return response;
 	}
 }

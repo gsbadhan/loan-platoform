@@ -26,6 +26,6 @@ public class AuthController {
 	@PostMapping("/{type}/verify")
 	public ResponseEntity<?> verification(@PathVariable(value = "type") AuthType type, @RequestBody AuthRequest body) {
 		AuthResponse response = authService.authorize(type, body);
-		return HttpResponse.apiAuthResponse(response);
+		return HttpResponse.ApiResponse(response);
 	}
 }

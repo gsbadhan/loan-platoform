@@ -27,11 +27,13 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	public AuthServiceImpl(@Qualifier("authRestTemplate") RestTemplate authRestTemplate, Environment env) {
+		this.authRestTemplate = authRestTemplate;
 		pancardServiceUrl = env.getProperty("pancard.gw.url");
 		adharCardServiceUrl = env.getProperty("adharcard.gw.url");
 	}
 
 	@Override
+	@CircuitBreaker(fallbackMethod = "authGWFallback", name = "authGWCircuitBreaker")
 	public AuthResponse authorize(AuthType type, AuthRequest body) {
 		AuthResponse response = null;
 		switch (type) {
@@ -44,15 +46,12 @@ public class AuthServiceImpl implements AuthService {
 		default:
 			response = new AuthResponse();
 			response.setStatus(false);
-			Map<String, String> errors = new HashMap<String, String>(1);
-			errors.put(Messages.NOT_SUPPORTED.name(), Messages.NOT_SUPPORTED.getValue());
-			response.setErrors(errors);
+			response.appendErrors(Messages.NOT_SUPPORTED.name(), Messages.NOT_SUPPORTED.getValue());
 			break;
 		}
 		return response;
 	}
 
-	@CircuitBreaker(fallbackMethod = "authGWFallback", name = "authGWCircuitBreaker")
 	private AuthResponse panCardAuthorisation(AuthRequest body) {
 		Map<String, String> request = new HashMap<String, String>();
 		request.put("pan", body.getUid());
@@ -63,7 +62,6 @@ public class AuthServiceImpl implements AuthService {
 		return new AuthResponse(response.get("pan-token"));
 	}
 
-	@CircuitBreaker(fallbackMethod = "authGWFallback", name = "authGWCircuitBreaker")
 	private AuthResponse adharCardAuthorisation(AuthRequest body) {
 		Map<String, String> request = new HashMap<String, String>();
 		request.put("adhar", body.getUid());
@@ -79,9 +77,7 @@ public class AuthServiceImpl implements AuthService {
 		log.error("error occured in authorize", t);
 		AuthResponse response = new AuthResponse();
 		response.setStatus(false);
-		Map<String, String> errors = new HashMap<String, String>(1);
-		errors.put(Messages.AUTH_SERVICE_DOWN.name(), Messages.AUTH_SERVICE_DOWN.getValue());
-		response.setErrors(errors);
+		response.appendErrors(Messages.SERVER_ERROR.name(), Messages.SERVER_ERROR.getValue());
 		return response;
 	}
 

@@ -4,11 +4,13 @@ import com.loanplatform.pojo.CarOfficeMessage;
 import com.loanplatform.pojo.DisburseOfficeMessage;
 import com.loanplatform.pojo.FrontOfficeMessage;
 import com.loanplatform.pojo.LoanFormRequest;
+import com.loanplatform.pojo.LoanStatusResponse;
+import com.loanplatform.pojo.LoanSubmitResponse;
 import com.loanplatform.pojo.RiskOfficeMessage;
 
 public interface LoanService {
 
-	void initiateLoanRequest(LoanFormRequest request);
+	LoanSubmitResponse initiateLoanRequest(LoanFormRequest request);
 
 	void frontOfficeVerification(FrontOfficeMessage msg);
 
@@ -17,5 +19,7 @@ public interface LoanService {
 	void riskOfficeVerification(RiskOfficeMessage msg);
 
 	void disbursalOfficeAction(DisburseOfficeMessage msg);
+
+	LoanStatusResponse loanStatus(Long loanRequestId);
 
 }
