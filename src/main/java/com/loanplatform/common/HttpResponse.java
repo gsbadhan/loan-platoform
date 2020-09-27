@@ -19,6 +19,8 @@ public class HttpResponse {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		} else if (response.getErrors().containsKey(Messages.UNAUTHORIZED.name())) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+		} else if (response.getErrors().containsKey(Messages.NOT_SUPPORTED.name())) {
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(response);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(response);
 	}
