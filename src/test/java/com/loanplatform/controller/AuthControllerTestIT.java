@@ -37,7 +37,7 @@ class AuthControllerTestIT {
 		body.setUid(PAN);
 		String type = AuthType.PAN.name();
 		mockMvc.perform(MockMvcRequestBuilders.post("/v1/auth/{type}/verify", type).contentType("application/json")
-				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.jsonPath("$.accessToken").exists());
 	}
 
@@ -48,7 +48,7 @@ class AuthControllerTestIT {
 		body.setUid(PAN);
 		String type = "XYZ";
 		mockMvc.perform(MockMvcRequestBuilders.post("/v1/auth/{type}/verify", type).contentType("application/json")
-				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().is4xxClientError())
+				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().isNotAcceptable())
 				.andExpect(MockMvcResultMatchers.jsonPath("$.errors.NOT_SUPPORTED").exists());
 	}
 
@@ -59,7 +59,7 @@ class AuthControllerTestIT {
 		body.setUid(PAN);
 		String type = AuthType.PAN.name();
 		mockMvc.perform(MockMvcRequestBuilders.post("/v1/auth/{type}/verify", type).contentType("application/json")
-				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().is5xxServerError())
+				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().isInternalServerError())
 				.andExpect(MockMvcResultMatchers.jsonPath("$.errors.SERVER_ERROR").exists());
 		;
 	}
