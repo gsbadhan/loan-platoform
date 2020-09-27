@@ -1,5 +1,7 @@
 package com.loanplatform.listener;
 
+import java.util.Arrays;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -7,8 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.loanplatform.pojo.CarOfficeMessage;
 import com.loanplatform.pojo.DisburseOfficeMessage;
+import com.loanplatform.pojo.EmailMessage;
 import com.loanplatform.pojo.FrontOfficeMessage;
 import com.loanplatform.pojo.RiskOfficeMessage;
+import com.loanplatform.service.EmailNotifyImpl;
 import com.loanplatform.service.LoanService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,8 @@ public class LoanApprovalListener {
 	@Autowired
 	@Qualifier("LoanServiceImpl")
 	private LoanService loanService;
+	@Autowired
+	private EmailNotifyImpl emailNotify;
 
 	@RabbitListener(queues = "frontOffice.verify.queue")
 	public void frontOfficeRecievedMessage(FrontOfficeMessage msg) {
@@ -47,5 +53,9 @@ public class LoanApprovalListener {
 	@RabbitListener(queues = "loanconfirmation.queue")
 	public void loanConfirmationRecievedMessage(RiskOfficeMessage msg) {
 		log.info("loanConfirmationRecievedMessage recieved message from RBMQ={}", msg);
+		// TODO: dummy email composition
+		EmailMessage mail = new EmailMessage("from-mail", Arrays.asList(msg.getEmail()), "some body");
+		emailNotify.send(mail);
 	}
+
 }
