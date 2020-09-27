@@ -18,6 +18,7 @@ public class DisburseOfficeMessage extends LoanApprovalMessage {
 	private String uid;
 	private String firstName;
 	private String lastName;
+	private String email;
 	private CarDetail carDetail;
 
 }

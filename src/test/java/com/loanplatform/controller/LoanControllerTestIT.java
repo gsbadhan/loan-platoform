@@ -1,5 +1,7 @@
 package com.loanplatform.controller;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.google.gson.Gson;
+import com.loanplatform.common.CarBodyType;
+import com.loanplatform.common.FuelType;
 import com.loanplatform.pojo.CarDetail;
 import com.loanplatform.pojo.CustomerDetail;
 import com.loanplatform.pojo.LoanFormRequest;
@@ -34,7 +38,8 @@ class LoanControllerTestIT {
 	@Test
 	void testLoanSubmitOk() throws Exception {
 		CustomerDetail customerDetail = new CustomerDetail("BRTUSFH78", "445234789", "abc@mail.com", "ravi", "jam");
-		CarDetail carDetail = new CarDetail();
+		CarDetail carDetail = new CarDetail("DLAQGH-4526", "delhi", "DF-GH-3578", "CHAS-67283849", "EN675", "IVTC",
+				"1600", "9956453201", CarBodyType.SEADN, FuelType.PETROL, 4, new Date(6373748), new Date(6373889));
 		float loanAmount = 120000;
 		LoanFormRequest body = new LoanFormRequest(loanAmount, customerDetail, carDetail);
 		mockMvc.perform(MockMvcRequestBuilders.post("/v1/loan/submit").contentType("application/json")
@@ -45,7 +50,8 @@ class LoanControllerTestIT {
 	@Test
 	void testLoanSubmitNotWorking() throws Exception {
 		CustomerDetail customerDetail = new CustomerDetail("BRTUSFH78", "445234789", "abc@mail.com", "ravi", "jam");
-		CarDetail carDetail = new CarDetail();
+		CarDetail carDetail = new CarDetail("DLAQGH-4526", "delhi", "DF-GH-3578", "CHAS-67283849", "EN675", "IVTC",
+				"1600", "9956453201", CarBodyType.SEADN, FuelType.PETROL, 4, new Date(6373748), new Date(6373889));
 		float loanAmount = 120000;
 		LoanFormRequest body = new LoanFormRequest(loanAmount, customerDetail, carDetail);
 		mockMvc.perform(MockMvcRequestBuilders.post("/v1/loan/submit").contentType("application/json")

@@ -2,6 +2,8 @@ package com.loanplatform.service;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,6 +51,7 @@ public class LoanServiceImpl implements LoanService {
 	@Qualifier("DisbursalOfficeAuthorityImpl")
 	private LoanAuthority<DisburseOfficeMessage> disburseOfficeAuthority;
 
+	@Transactional
 	@Override
 	public LoanSubmitResponse initiateLoanRequest(LoanFormRequest request) {
 		LoanSubmitResponse response = new LoanSubmitResponse();
@@ -60,7 +63,8 @@ public class LoanServiceImpl implements LoanService {
 			response.setLoanRequestId(workflowPojoDb.getId());
 			FrontOfficeMessage msg = new FrontOfficeMessage(workflowPojoDb.getId().toString(),
 					request.getCustomerDetail().getUid(), request.getCustomerDetail().getFirstName(),
-					request.getCustomerDetail().getLastName(), request.getCarDetail());
+					request.getCustomerDetail().getLastName(), request.getCustomerDetail().getEmail(),
+					request.getCarDetail());
 			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
 					env.getProperty("rabbitmq.queue.frontoffice.verify.routingkey"), msg);
 			log.info("sent message to RBMQ={}", msg);
@@ -77,6 +81,7 @@ public class LoanServiceImpl implements LoanService {
 		// TODO : validate customer's data
 	}
 
+	@Transactional
 	@Override
 	public void frontOfficeVerification(FrontOfficeMessage msg) {
 		LoanAuthorityResponse response = frontOfficeAuthority.process(msg);
@@ -84,14 +89,18 @@ public class LoanServiceImpl implements LoanService {
 				loanWorkflowRepo.findById(Long.parseLong(msg.getLoanRequestId())).get());
 		if (response.getAuthorityAction() == AuthorityAction.ACCEPTED) {
 			CarOfficeMessage carOfficeMessage = new CarOfficeMessage(msg.getLoanRequestId(), msg.getUid(),
-					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
+					msg.getFirstName(), msg.getLastName(), msg.getEmail(), msg.getCarDetail());
+			carOfficeMessage.setLoanStage(LoanStage.CAR_LOAN_OFFICE);
 			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
 					env.getProperty("rabbitmq.queue.cardept.verify.routingkey"), carOfficeMessage);
 		} else {
-			sendToNotificationQueue(new ConfirmationMessage(msg, response));
+			msg.setLoanStatus(LoanStatus.REJECTED);
+			msg.setReviews(response.getReviews());
+			sendToNotificationQueue(new ConfirmationMessage(msg));
 		}
 	}
 
+	@Transactional
 	@Override
 	public void carOfficeVerification(CarOfficeMessage msg) {
 		LoanAuthorityResponse response = carOfficeAuthority.process(msg);
@@ -99,14 +108,18 @@ public class LoanServiceImpl implements LoanService {
 				loanWorkflowRepo.findById(Long.parseLong(msg.getLoanRequestId())).get());
 		if (response.getAuthorityAction() == AuthorityAction.ACCEPTED) {
 			CarOfficeMessage carOfficeMessage = new CarOfficeMessage(msg.getLoanRequestId(), msg.getUid(),
-					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
+					msg.getFirstName(), msg.getLastName(), msg.getEmail(), msg.getCarDetail());
+			carOfficeMessage.setLoanStage(LoanStage.RISK_OFFICE);
 			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
 					env.getProperty("rabbitmq.queue.riskdept.verify.routingkey"), carOfficeMessage);
 		} else {
-			sendToNotificationQueue(new ConfirmationMessage(msg, response));
+			msg.setLoanStatus(LoanStatus.REJECTED);
+			msg.setReviews(response.getReviews());
+			sendToNotificationQueue(new ConfirmationMessage(msg));
 		}
 	}
 
+	@Transactional
 	@Override
 	public void riskOfficeVerification(RiskOfficeMessage msg) {
 		LoanAuthorityResponse response = riskOfficeAuthority.process(msg);
@@ -114,20 +127,26 @@ public class LoanServiceImpl implements LoanService {
 				loanWorkflowRepo.findById(Long.parseLong(msg.getLoanRequestId())).get());
 		if (response.getAuthorityAction() == AuthorityAction.ACCEPTED) {
 			CarOfficeMessage carOfficeMessage = new CarOfficeMessage(msg.getLoanRequestId(), msg.getUid(),
-					msg.getFirstName(), msg.getLastName(), msg.getCarDetail());
+					msg.getFirstName(), msg.getLastName(), msg.getEmail(), msg.getCarDetail());
+			carOfficeMessage.setLoanStage(LoanStage.DISBURSAL_OFFICE);
 			amqpTemplate.convertAndSend(env.getProperty("rabbitmq.exchnage.loanprocessing"),
 					env.getProperty("rabbitmq.queue.disbursaldept.verify.routingkey"), carOfficeMessage);
 		} else {
-			sendToNotificationQueue(new ConfirmationMessage(msg, response));
+			msg.setLoanStatus(LoanStatus.REJECTED);
+			msg.setReviews(response.getReviews());
+			sendToNotificationQueue(new ConfirmationMessage(msg));
 		}
 	}
 
+	@Transactional
 	@Override
 	public void disbursalOfficeAction(DisburseOfficeMessage msg) {
 		LoanAuthorityResponse response = disburseOfficeAuthority.process(msg);
 		updateWorkflowData(LoanStage.DISBURSAL_OFFICE, response,
 				loanWorkflowRepo.findById(Long.parseLong(msg.getLoanRequestId())).get());
-		sendToNotificationQueue(new ConfirmationMessage(msg, response));
+		msg.setLoanStatus(LoanStatus.ACCEPTED);
+		msg.setReviews(response.getReviews());
+		sendToNotificationQueue(new ConfirmationMessage(msg));
 	}
 
 	private void sendToNotificationQueue(ConfirmationMessage confirmationMessage) {
@@ -157,6 +176,7 @@ public class LoanServiceImpl implements LoanService {
 		loanWorkflowRepo.save(workflowPojoDb);
 	}
 
+	@Transactional
 	@Override
 	public LoanStatusResponse loanStatus(Long loanRequestId) {
 		LoanStatusResponse response = new LoanStatusResponse();

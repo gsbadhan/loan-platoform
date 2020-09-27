@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.loanplatform.pojo.CarOfficeMessage;
+import com.loanplatform.pojo.ConfirmationMessage;
 import com.loanplatform.pojo.DisburseOfficeMessage;
 import com.loanplatform.pojo.EmailMessage;
 import com.loanplatform.pojo.FrontOfficeMessage;
@@ -51,10 +52,10 @@ public class LoanApprovalListener {
 	}
 
 	@RabbitListener(queues = "loanconfirmation.queue")
-	public void loanConfirmationRecievedMessage(RiskOfficeMessage msg) {
+	public void loanConfirmationRecievedMessage(ConfirmationMessage msg) {
 		log.info("loanConfirmationRecievedMessage recieved message from RBMQ={}", msg);
 		// TODO: dummy email composition
-		EmailMessage mail = new EmailMessage("from-mail", Arrays.asList(msg.getEmail()), "some body");
+		EmailMessage mail = new EmailMessage("from-mail", Arrays.asList("to-mail"), "some body");
 		emailNotify.send(mail);
 	}
 
