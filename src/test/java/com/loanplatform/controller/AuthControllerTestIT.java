@@ -61,7 +61,6 @@ class AuthControllerTestIT {
 		mockMvc.perform(MockMvcRequestBuilders.post("/v1/auth/{type}/verify", type).contentType("application/json")
 				.content(new Gson().toJson(body))).andExpect(MockMvcResultMatchers.status().isInternalServerError())
 				.andExpect(MockMvcResultMatchers.jsonPath("$.errors.SERVER_ERROR").exists());
-		;
 	}
 
 }
