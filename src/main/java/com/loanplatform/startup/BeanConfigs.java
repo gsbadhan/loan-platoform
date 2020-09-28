@@ -12,6 +12,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * 
+ * Properties loading and common beans
+ */
+
 @Configuration
 @PropertySource("classpath:application.yml")
 public class BeanConfigs {

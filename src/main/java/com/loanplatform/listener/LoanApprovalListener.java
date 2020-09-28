@@ -18,12 +18,12 @@ import com.loanplatform.service.LoanService;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Component
-@Slf4j
 /**
  * Loan event consumer for loan transition
  *
  */
+@Component
+@Slf4j
 public class LoanApprovalListener {
 	@Autowired
 	@Qualifier("LoanServiceImpl")

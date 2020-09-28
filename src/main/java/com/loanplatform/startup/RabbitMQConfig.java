@@ -15,6 +15,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+/**
+ * RabbitMQ configuration i.e. Exchanges, Queue Binding, Message converter and
+ * Connection settings
+ *
+ */
 @Configuration
 public class RabbitMQConfig {
 

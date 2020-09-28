@@ -10,6 +10,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Application Startup class
+ *
+ */
+
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.*" })
 @EnableJpaRepositories(basePackages = { "com.loanplatform.repository" })
