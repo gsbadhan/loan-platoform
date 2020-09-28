@@ -5,6 +5,10 @@ import org.springframework.stereotype.Component;
 import com.loanplatform.pojo.LoanAuthorityResponse;
 import com.loanplatform.pojo.RiskOfficeMessage;
 
+/**
+ * 
+ * Risk office business logic handler
+ */
 @Component("RiskOfficeAuthorityImpl")
 public class RiskOfficeAuthorityImpl implements LoanAuthority<RiskOfficeMessage> {
 

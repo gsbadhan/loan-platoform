@@ -8,6 +8,10 @@ import com.loanplatform.pojo.LoanStatusResponse;
 import com.loanplatform.pojo.LoanSubmitResponse;
 import com.loanplatform.pojo.RiskOfficeMessage;
 
+/**
+ * 
+ * LoanService manage cycle and transition
+ */
 public interface LoanService {
 
 	LoanSubmitResponse initiateLoanRequest(LoanFormRequest request);

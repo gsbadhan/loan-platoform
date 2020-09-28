@@ -5,6 +5,10 @@ import org.springframework.stereotype.Component;
 import com.loanplatform.pojo.DisburseOfficeMessage;
 import com.loanplatform.pojo.LoanAuthorityResponse;
 
+/**
+ * 
+ * Disburse office business logic handler
+ */
 @Component("DisbursalOfficeAuthorityImpl")
 public class DisbursalOfficeAuthorityImpl implements LoanAuthority<DisburseOfficeMessage> {
 

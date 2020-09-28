@@ -4,6 +4,10 @@ import org.springframework.stereotype.Component;
 
 import com.loanplatform.pojo.EmailMessage;
 
+/**
+ * Email notification handler
+ *
+ */
 @Component
 public class EmailNotifyImpl implements Notifcation<EmailMessage> {
 

@@ -5,6 +5,10 @@ import org.springframework.stereotype.Component;
 import com.loanplatform.pojo.CarOfficeMessage;
 import com.loanplatform.pojo.LoanAuthorityResponse;
 
+/**
+ * 
+ * Car Loan office business logic handler
+ */
 @Component("CarOfficeAuthorityImpl")
 public class CarOfficeAuthorityImpl implements LoanAuthority<CarOfficeMessage> {
 
