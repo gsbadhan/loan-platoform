@@ -1,0 +1,77 @@
+## KYC configuration
+pancard.gw.url: https://api.govt.com/pancard/validate?
+adharcard.gw.url: https://api.govt.com/adhar/validate?
+
+
+## auth service rest template configuration
+auth.resttemplate.maxtotal: 100
+auth.resttemplate.maxperroute: 20
+auth.resttemplate.connecttimeout: 5000
+auth.resttemplate.connectionrequesttimeout: 5000
+auth.resttemplate.sockettimeout: 5000
+
+## rabbitmq configuration
+spring.rabbitmq.host: localhost
+spring.rabbitmq.port: 5672
+spring.rabbitmq.username: guest
+spring.rabbitmq.password: guest
+
+rabbitmq.exchnage.loanprocessing: loanProcessingExchng
+rabbitmq.exchnage.deadloanprocessing: deadLoanProcessingExchng
+
+rabbitmq.queue.frontoffice.verify: frontOffice.verify.queue
+rabbitmq.queue.frontoffice.verify.routingkey: frontOffice.form.verify
+
+rabbitmq.queue.cardept.verify: cardept.verify.queue
+rabbitmq.queue.cardept.verify.routingkey: cardept.form.verify
+
+rabbitmq.queue.riskdept.verify: riskdept.verify.queue
+rabbitmq.queue.riskdept.verify.routingkey: riskdept.form.verify
+
+rabbitmq.queue.disbursaldept.verify: disbursaldept.verify.queue
+rabbitmq.queue.disbursaldept.verify.routingkey: disbursaldept.form.verify
+
+rabbitmq.queue.loanconfirmation: loanconfirmation.queue
+rabbitmq.queue.loanconfirmation.routingkey: loanconfirmation.notify
+
+rabbitmq.queue.deadloan: deadloan.queue
+rabbitmq.queue.deadloan.routingkey: deadloan.tag
+
+
+## MYSQL configuration
+spring.datasource.url: jdbc:h2:mem:testdb
+spring.datasource.username: 
+spring.datasource.password: 
+spring.jpa.show-sql: true
+spring.jpa.hibernate.ddl-auto: create
+spring.jpa.generate-ddl: true
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
+
+
+
+### actuator configuration
+management.endpoints.web.exposure.include:  '*'
+management.endpoint.health.show-details:  always
+management.health.diskspace.enabled:  false
+management.health.circuitbreakers.enabled:  true
+
+## circuit breaker configuration
+resilience4j.circuitbreaker:
+    instances:
+        authGWCircuitBreaker:
+            registerHealthIndicator: true
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 10
+            permittedNumberOfCallsInHalfOpenState: 3
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+            waitDurationInOpenState: 5s
+            failureRateThreshold: 50
+            eventConsumerBufferSize: 10
+            recordExceptions:
+                - org.springframework.web.client.HttpServerErrorException
+                - org.springframework.web.client.ResourceAccessException
+                - java.util.concurrent.TimeoutException
+                - java.io.IOException
+                - java.net.UnknownHostException
+                - sun.security.provider.certpath.SunCertPathBuilderException
+
