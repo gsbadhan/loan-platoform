@@ -38,14 +38,15 @@ rabbitmq.queue.deadloan: deadloan.queue
 rabbitmq.queue.deadloan.routingkey: deadloan.tag
 
 
-## MYSQL configuration
-spring.datasource.url: jdbc:h2:mem:testdb
-spring.datasource.username: 
-spring.datasource.password: 
+## MYSQL configuration (Enable properties according to Testcontainer & Normal )
+#spring.datasource.url: jdbc:h2:mem:testdb
+#spring.datasource.username: 
+#spring.datasource.password: 
 spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: create
 spring.jpa.generate-ddl: true
-spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
+#spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MySQL5Dialect
 
 
 
