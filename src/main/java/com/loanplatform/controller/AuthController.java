@@ -25,6 +25,10 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "Authorisation API service")
 public class AuthController {
 
+	enum test {
+		XX;
+	}
+
 	@Autowired
 	@Qualifier("AuthServiceImpl")
 	private AuthService authService;
